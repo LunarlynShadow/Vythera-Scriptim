@@ -1,0 +1,90 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Enemy Boxes",
+    Text = "Enemy Boxes ESP Başarıyla Açıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+----------------------------------------------------
+-- 🟥 Enemy Boxes ESP SCRIPT
+----------------------------------------------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Global değişken
+_G.ESPConnection = _G.ESPConnection or nil
+
+-- Hollow Box oluşturma fonksiyonu
+local function createBox()
+    local box = Instance.new("BillboardGui")
+    box.Size = UDim2.new(4,0,5,0)
+    box.AlwaysOnTop = true
+    box.Adornee = nil
+    box.Name = "PlayerBox"
+
+    local borderThickness = 0.05
+
+    local top = Instance.new("Frame")
+    top.Size = UDim2.new(1,0,borderThickness,0)
+    top.Position = UDim2.new(0,0,0,0)
+    top.BackgroundColor3 = Color3.new(1,0,0)
+    top.BorderSizePixel = 0
+    top.Parent = box
+
+    local bottom = Instance.new("Frame")
+    bottom.Size = UDim2.new(1,0,borderThickness,0)
+    bottom.Position = UDim2.new(0,0,1-borderThickness,0)
+    bottom.BackgroundColor3 = Color3.new(1,0,0)
+    bottom.BorderSizePixel = 0
+    bottom.Parent = box
+
+    local left = Instance.new("Frame")
+    left.Size = UDim2.new(borderThickness,0,1,0)
+    left.Position = UDim2.new(0,0,0,0)
+    left.BackgroundColor3 = Color3.new(1,0,0)
+    left.BorderSizePixel = 0
+    left.Parent = box
+
+    local right = Instance.new("Frame")
+    right.Size = UDim2.new(borderThickness,0,1,0)
+    right.Position = UDim2.new(1-borderThickness,0,0,0)
+    right.BackgroundColor3 = Color3.new(1,0,0)
+    right.BorderSizePixel = 0
+    right.Parent = box
+
+    return box
+end
+
+-- Enemyleri kontrol ve highlight ekleme
+local function highlightEnemies()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                if not player.Character:FindFirstChild("PlayerBox") then
+                    local box = createBox()
+                    box.Adornee = player.Character.HumanoidRootPart
+                    box.Parent = player.Character
+                end
+            end
+        else
+            if player.Character and player.Character:FindFirstChild("PlayerBox") then
+                player.Character.PlayerBox:Destroy()
+            end
+        end
+    end
+end
+
+-- Eskiden varsa bağlantıyı kes
+if _G.ESPConnection then _G.ESPConnection:Disconnect() end
+_G.ESPConnection = RunService.RenderStepped:Connect(highlightEnemies)
+
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character and player.Character:FindFirstChild("PlayerBox") then
+        player.Character.PlayerBox:Destroy()
+    end
+end)
