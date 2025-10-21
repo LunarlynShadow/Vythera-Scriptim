@@ -1,0 +1,51 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Fnaf 2 Script",
+    Text = "Fnaf 2 Esp Başarıyla Kapatıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+----------------------------------------------------
+-- ❌ FNAF 2 ESP KAPATICI
+----------------------------------------------------
+local workspace = game:GetService("Workspace")
+
+-- Yalnızca yeni karakterler
+local highlightCharacters = {
+    ["Toy Chica"] = true,
+    ["Toy Freddy"] = true,
+    ["Toy Bonnie"] = true,
+    ["Withered Bonnie"] = true,
+    ["Withered Chica"] = true,
+    ["Withered Freddy"] = true,
+    ["Withered Foxy"] = true,
+    ["Mangle"] = true,
+    ["Balloon Boy"] = true
+}
+
+-- Highlight varsa güvenli şekilde sil
+local function removeHighlightIfCharacter(child)
+    if highlightCharacters[child.Name] and child:IsA("Model") then
+        local highlight = child:FindFirstChildOfClass("Highlight")
+        if highlight then
+            highlight.Adornee = nil
+            highlight.Parent = nil
+        end
+    end
+end
+
+-- Mevcut karakterlerdeki highlight'ları sil
+for name, _ in pairs(highlightCharacters) do
+    local model = workspace:FindFirstChild(name)
+    if model then
+        removeHighlightIfCharacter(model)
+    end
+end
+
+-- Sonradan eklenecek karakterler için bir kez sil
+workspace.ChildAdded:Connect(function(child)
+    removeHighlightIfCharacter(child)
+end)
