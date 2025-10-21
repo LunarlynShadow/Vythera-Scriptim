@@ -1,0 +1,24 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Enemy Boxes",
+    Text = "Enemy Boxes ESP Başarıyla Kapatıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+local Players = game:GetService("Players")
+
+-- RenderStepped bağlantısını kes
+if _G.ESPConnection then
+    _G.ESPConnection:Disconnect()
+    _G.ESPConnection = nil
+end
+
+-- Mevcut PlayerBox'ları temizle
+for _, player in pairs(Players:GetPlayers()) do
+    if player.Character and player.Character:FindFirstChild("PlayerBox") then
+        player.Character.PlayerBox:Destroy()
+    end
+end
