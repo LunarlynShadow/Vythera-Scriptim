@@ -1,3 +1,13 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Arsenal Script",
+    Text = "Aimbot Açıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
 -- Aimbot Script
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
