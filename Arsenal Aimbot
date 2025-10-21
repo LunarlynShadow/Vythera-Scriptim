@@ -1,0 +1,110 @@
+-- Aimbot Script
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local AimbotEnabled = true -- Başlangıçta açık/kapalı yapmak için true/false
+local LockedPlayer = nil
+local LastKnownPosition = nil
+
+local FieldOfView = 40 -- FOV ayarı
+local CenterPrioritizationFactor = 0.5 -- Ekran ortası önceliği
+local function isEnemy(player)
+    if not LocalPlayer.Team or not player.Team then return false end
+    return LocalPlayer.Team ~= player.Team
+end
+
+-- Hedefleme için body part seçimi (head/torso)
+local function getTargetBodyPart()
+    if math.random() <= 0.7 then
+        return "UpperTorso"
+    else
+        return "Head"
+    end
+end
+
+-- En yakın düşmanı bul
+local function getClosestEnemy()
+    local mousePos = UserInputService:GetMouseLocation()
+    local closestPlayer = nil
+    local closestScore = math.huge
+    local screenCenter = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and isEnemy(player) then
+            local targetPart = getTargetBodyPart()
+            local part = player.Character:FindFirstChild(targetPart)
+            if part then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                    local centerDist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude * CenterPrioritizationFactor
+                    local distanceToPlayer = (LocalPlayer.Character.Head.Position - part.Position).Magnitude
+                    local score = screenDist + centerDist + distanceToPlayer
+
+                    if score < closestScore then
+                        closestScore = score
+                        closestPlayer = {player=player, bodyPart=targetPart}
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Kamerayı kilitle
+local function lockCamera(targetData)
+    if targetData and targetData.player.Character then
+        local part = targetData.player.Character:FindFirstChild(targetData.bodyPart)
+        if not part then return end
+
+        LockedPlayer = targetData.player
+        LastKnownPosition = part.Position
+
+        RunService:BindToRenderStep("LockCamera", Enum.RenderPriority.Camera.Value, function()
+            if LockedPlayer and LockedPlayer.Character and isEnemy(LockedPlayer) then
+                local currentPart = LockedPlayer.Character:FindFirstChild(targetData.bodyPart)
+                if currentPart then
+                    local targetPos = currentPart.Position
+                    if (targetPos - LastKnownPosition).Magnitude > 5 then
+                        RunService:UnbindFromRenderStep("LockCamera")
+                        LockedPlayer = nil
+                        LastKnownPosition = nil
+                        return
+                    end
+                    LastKnownPosition = targetPos
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+                else
+                    RunService:UnbindFromRenderStep("LockCamera")
+                    LockedPlayer = nil
+                    LastKnownPosition = nil
+                end
+            else
+                RunService:UnbindFromRenderStep("LockCamera")
+                LockedPlayer = nil
+                LastKnownPosition = nil
+            end
+        end)
+    end
+end
+
+-- Sağ tık ile hedefi kilitle
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 and AimbotEnabled then
+        local closest = getClosestEnemy()
+        lockCamera(closest)
+    end
+end)
+
+-- Sağ tık bırakıldığında aimbotu bırak
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        RunService:UnbindFromRenderStep("LockCamera")
+        LockedPlayer = nil
+        LastKnownPosition = nil
+    end
+end)
