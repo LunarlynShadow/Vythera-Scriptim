@@ -1,0 +1,24 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Enemy Tracers",
+    Text = "Enemy Tracers Başarıyla Kapatıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+-- RenderStepped bağlantısını kes
+if _G.TracerConnection then
+    _G.TracerConnection:Disconnect()
+    _G.TracerConnection = nil
+end
+
+-- Çizgileri temizle
+if _G.TracerLines then
+    for _, line in ipairs(_G.TracerLines) do
+        line.Visible = false
+        line:Remove()
+    end
+    _G.TracerLines = {}
+end
