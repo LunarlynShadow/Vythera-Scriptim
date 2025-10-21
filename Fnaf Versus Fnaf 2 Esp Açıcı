@@ -1,0 +1,54 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Fnaf 2 Script",
+    Text = "Fnaf 2 Esp Başarıyla Açıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+----------------------------------------------------
+-- ✨ FNAF 2 ESP SCRIPT
+----------------------------------------------------
+local workspace = game:GetService("Workspace")
+
+-- Yalnızca yeni karakterler ve renkleri
+local highlightColors = {
+    ["Toy Chica"] = Color3.fromRGB(189, 176, 0),
+    ["Toy Freddy"] = Color3.fromRGB(189, 92, 22),
+    ["Toy Bonnie"] = Color3.fromRGB(0, 139, 189),
+    ["Withered Bonnie"] = Color3.fromRGB(0, 0, 255),
+    ["Withered Chica"] = Color3.fromRGB(135, 115, 0),
+    ["Withered Freddy"] = Color3.fromRGB(56, 35, 8),
+    ["Withered Foxy"] = Color3.fromRGB(255, 0, 4),
+    ["Mangle"] = Color3.fromRGB(239, 17, 255),
+    ["Balloon Boy"] = Color3.fromRGB(255, 186, 151)
+}
+
+-- Highlight ekleme fonksiyonu
+local function addHighlightIfCharacter(child)
+    local color = highlightColors[child.Name]
+    if color and child:IsA("Model") then
+        if not child:FindFirstChildOfClass("Highlight") then
+            local highlight = Instance.new("Highlight")
+            highlight.Adornee = child
+            highlight.FillColor = color
+            highlight.OutlineColor = color
+            highlight.Parent = child
+        end
+    end
+end
+
+-- Var olan karakterleri kontrol et
+for name, _ in pairs(highlightColors) do
+    local model = workspace:FindFirstChild(name)
+    if model then
+        addHighlightIfCharacter(model)
+    end
+end
+
+-- Yeni eklenecek objeleri sürekli dinle
+workspace.ChildAdded:Connect(function(child)
+    addHighlightIfCharacter(child)
+end)
