@@ -1,0 +1,57 @@
+-- 📢 Notification on Load
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+    Title = "☆Vythera 🌌 : Enemy Tracers",
+    Text = "Enemy Tracers Başarıyla Açıldı! Yapımcı : SHADOWCASE1",
+    Button1 = "Tamamdır!",
+    Duration = 5
+})
+
+----------------------------------------------------
+-- ✨ Enemy Tracers SCRIPT
+----------------------------------------------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+_G.TracerLines = _G.TracerLines or {}
+_G.TracerConnection = _G.TracerConnection or nil
+
+-- Tracer oluştur
+local function createLine()
+    local line = Drawing.new("Line")
+    line.Visible = true
+    line.Thickness = 3
+    line.Color = Color3.new(1,0,0)
+    return line
+end
+
+-- Tracer güncelle
+local function updateTracers()
+    local screenCenter = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+    local index = 1
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = player.Character.HumanoidRootPart
+            local screenPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+            if onScreen then
+                local line = _G.TracerLines[index] or createLine()
+                line.From = screenCenter
+                line.To = Vector2.new(screenPos.X, screenPos.Y)
+                line.Visible = true
+                _G.TracerLines[index] = line
+                index = index + 1
+            end
+        end
+    end
+    -- Kalan çizgileri gizle
+    for i = index, #_G.TracerLines do
+        _G.TracerLines[i].Visible = false
+    end
+end
+
+-- Eskiden varsa bağlantıyı kes
+if _G.TracerConnection then _G.TracerConnection:Disconnect() end
+_G.TracerConnection = RunService.RenderStepped:Connect(updateTracers)
