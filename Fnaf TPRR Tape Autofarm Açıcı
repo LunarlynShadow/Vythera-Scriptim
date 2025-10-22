@@ -1,0 +1,37 @@
+local player = game.Players.LocalPlayer
+local workspace = game:GetService("Workspace")
+
+-- Flag oluştur veya varsa kullan
+local flag = player:FindFirstChild("CandyPullActive")
+if not flag then
+    flag = Instance.new("BoolValue")
+    flag.Name = "CandyPullActive"
+    flag.Value = false
+    flag.Parent = player
+end
+
+-- Döngü zaten çalışıyorsa yeni thread başlatma
+if not flag.Value then
+    flag.Value = true
+
+    -- Candy çekme döngüsü
+    task.spawn(function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        
+        while flag.Value do
+            local candy = workspace:FindFirstChild("Candy")
+            if candy and candy:IsA("BasePart") then
+                pcall(function()
+                    candy.CFrame = hrp.CFrame
+                end)
+            else
+                -- Candy yoksa bekle
+                -- print("Daha Fazla Candy Bulunamadı!")
+            end
+            task.wait(0.2)
+        end
+    end)
+end
+
+print("Candy çekme açıldı!")
